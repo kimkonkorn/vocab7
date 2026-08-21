@@ -3,605 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vocab Master App</title>
+  <title>Vocabulary Flashcards</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    body {
-      background-color: #f0f4f8;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 480px;
-      text-align: center;
-    }
-
-    /* Mode Switcher Tabs */
-    .mode-tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      background: #e2e8f0;
-      padding: 4px;
-      border-radius: 12px;
-    }
-
-    .tab-btn {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      border-radius: 8px;
-      font-weight: 700;
-      font-size: 14px;
-      cursor: pointer;
-      background: transparent;
-      color: #64748b;
-      transition: all 0.2s ease;
-    }
-
-    .tab-btn.active {
-      background: #ffffff;
-      color: #4f46e5;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    }
-
-    .header {
-      margin-bottom: 20px;
-    }
-
-    .header h1 {
-      color: #1e293b;
-      font-size: 24px;
-      margin-bottom: 5px;
-    }
-
-    .progress {
-      color: #64748b;
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .stats-bar {
-      display: flex;
-      justify-content: space-around;
-      background: #ffffff;
-      padding: 10px;
-      border-radius: 10px;
-      margin-top: 10px;
-      font-size: 12px;
-      font-weight: 700;
-      border: 1px solid #e2e8f0;
-    }
-
-    .stat-learned { color: #16a34a; }
-    .stat-review { color: #dc2626; }
-
-    .voice-selector {
-      margin-top: 10px;
-      font-size: 13px;
-      color: #475569;
-    }
-
-    .voice-selector select {
-      padding: 4px 8px;
-      border-radius: 6px;
-      border: 1px solid #cbd5e1;
-      background-color: #ffffff;
-      font-size: 13px;
-    }
-
-    /* Flashcard Mode Styles */
-    .card-container {
-      perspective: 1000px;
-      width: 100%;
-      height: 300px;
-      cursor: pointer;
-      margin-bottom: 15px;
-    }
-
-    .card {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      transform-style: preserve-3d;
-      transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-      border-radius: 20px;
-    }
-
-    .card.flipped {
-      transform: rotateY(180deg);
-    }
-
-    .card-face {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      backface-visibility: hidden;
-      border-radius: 20px;
-      padding: 25px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-    }
-
-    .card-front {
-      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    }
-
-    .level-badge {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      background: #e0f2fe;
-      color: #0369a1;
-      padding: 4px 10px;
-      border-radius: 15px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .word-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 8px;
-    }
-
-    .word {
-      font-size: 32px;
-      font-weight: 800;
-      color: #0f172a;
-    }
-
-    .btn-audio {
-      background: #e0e7ff;
-      border: none;
-      color: #4338ca;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .pos {
-      font-size: 14px;
-      color: #6366f1;
-      font-style: italic;
-      font-weight: 600;
-    }
-
-    .hint {
-      position: absolute;
-      bottom: 15px;
-      font-size: 12px;
-      color: #94a3b8;
-    }
-
-    .card-back {
-      background: #4f46e5;
-      color: #ffffff;
-      transform: rotateY(180deg);
-      text-align: center;
-    }
-
-    .meaning {
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 10px;
-    }
-
-    .synonyms {
-      font-size: 13px;
-      color: #c7d2fe;
-      margin-bottom: 15px;
-    }
-
-    .example {
-      font-size: 13px;
-      line-height: 1.4;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-style: italic;
-    }
-
-    /* Memory Rating Buttons */
-    .memory-controls {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-
-    .btn-review {
-      background-color: #fee2e2;
-      color: #991b1b;
-    }
-
-    .btn-know {
-      background-color: #dcfce7;
-      color: #166534;
-    }
-
-    /* General Nav Controls */
-    .controls {
-      display: flex;
-      gap: 10px;
-    }
-
-    button {
-      flex: 1;
-      padding: 12px 16px;
-      border: none;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .btn-prev, .btn-next {
-      background-color: #ffffff;
-      color: #334155;
-      border: 1px solid #cbd5e1;
-    }
-
-    .btn-random {
-      background-color: #6366f1;
-      color: #ffffff;
-    }
-
-    /* Game Mode Styles */
-    #game-mode {
-      display: none;
-      background: #ffffff;
-      padding: 20px;
-      border-radius: 20px;
-      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-      border: 1px solid #e2e8f0;
-    }
-
-    .quiz-word-box {
-      margin: 20px 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .quiz-word {
-      font-size: 28px;
-      font-weight: 800;
-      color: #0f172a;
-    }
-
-    .options-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .option-btn {
-      background: #f8fafc;
-      border: 2px solid #e2e8f0;
-      color: #334155;
-      padding: 12px;
-      text-align: left;
-      border-radius: 10px;
-      font-size: 15px;
-    }
-
-    .option-btn:hover {
-      background: #f1f5f9;
-      border-color: #cbd5e1;
-    }
-
-    .option-btn.correct {
-      background: #dcfce7 !important;
-      border-color: #22c55e !important;
-      color: #15803d !important;
-    }
-
-    .option-btn.wrong {
-      background: #fee2e2 !important;
-      border-color: #ef4444 !important;
-      color: #b91c1c !important;
-    }
-
-    .quiz-score {
-      font-size: 16px;
-      font-weight: 700;
-      color: #6366f1;
-      margin-bottom: 10px;
-    }
+    body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background: #f0f2f5; margin: 0; }
+    .card-container { perspective: 1000px; width: 320px; height: 220px; cursor: pointer; }
+    .card { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); background: white; }
+    .card.flipped { transform: rotateY(180deg); }
+    .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; border-radius: 12px; }
+    .card-back { transform: rotateY(180deg); background: #fdfdfd; }
+    .word { font-size: 28px; font-weight: bold; margin-bottom: 8px; }
+    .pos { font-size: 14px; color: #666; font-style: italic; }
+    .meaning { font-size: 20px; color: #2c3e50; font-weight: bold; margin-bottom: 8px; }
+    .synonyms, .example { font-size: 13px; color: #555; text-align: center; margin-top: 4px; }
+    .controls { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+    button { padding: 8px 16px; border: none; border-radius: 6px; background: #007bff; color: white; cursor: pointer; font-size: 14px; }
+    button:hover { background: #0056b3; }
+    .stats { margin-top: 15px; font-size: 14px; display: flex; gap: 15px; }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    
-    <!-- Mode Selector Tabs -->
-    <div class="mode-tabs">
-      <button class="tab-btn active" id="tab-flashcard" onclick="switchMode('flashcard')">🎴 Flashcard</button>
-      <button class="tab-btn" id="tab-quiz" onclick="switchMode('quiz')">🎮 เกมทายคำศัพท์</button>
-    </div>
-
-    <!-- FLASHCARD MODE -->
-    <div id="flashcard-mode">
-      <div class="header">
-        <div class="progress" id="progress">1 / 10</div>
-        
-        <!-- Voice Dropdown -->
-        <div class="voice-selector">
-          <label for="accent-select">สำเนียงเสียง: </label>
-          <select id="accent-select">
-            <option value="en-US">🇺🇸 English (US)</option>
-            <option value="en-GB">🇬🇧 English (UK)</option>
-          </select>
-        </div>
-
-        <!-- Stats Bar -->
-        <div class="stats-bar">
-          <span class="stat-learned" id="stat-learned">จำได้แล้ว: 0</span>
-          <span class="stat-review" id="stat-review">ต้องทบทวน: 0</span>
-        </div>
-      </div>
-
-      <!-- Flashcard Element -->
-      <div class="card-container" onclick="flipCard()">
-        <div class="card" id="card">
-          <div class="card-face card-front">
-            <span class="level-badge" id="card-level">A2</span>
-            <div class="word-wrapper">
-              <div class="word" id="card-word">Garden</div>
-              <button class="btn-audio" onclick="speakCurrentWord(event)">🔊</button>
-            </div>
-            <div class="pos" id="card-pos">Noun</div>
-            <div class="hint">แตะการ์ดเพื่อเปิดดูคำแปล ↺</div>
-          </div>
-
-          <div class="card-face card-back">
-            <div class="meaning" id="card-meaning">สวน</div>
-            <div class="synonyms" id="card-synonyms">Synonyms: yard, lawn</div>
-            <div class="example" id="card-example">"They spent the afternoon working in the garden."</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Memory Rating Controls -->
-      <div class="memory-controls">
-        <button class="btn-review" onclick="markMemory(false)">❌ ยังจำไม่ได้</button>
-        <button class="btn-know" onclick="markMemory(true)">มั่งใจ! จำได้แล้ว  YES!</button>
-      </div>
-
-      <!-- Nav Controls -->
-      <div class="controls">
-        <button class="btn-prev" onclick="prevCard()">◄ ก่อนหน้า</button>
-        <button class="btn-random" onclick="randomCard()">🎲 สุ่ม</button>
-        <button class="btn-next" onclick="nextCard()">ถัดไป ►</button>
-      </div>
-    </div>
-
-    <!-- QUIZ GAME MODE -->
-    <div id="game-mode">
-      <div class="quiz-score" id="quiz-score">คะแนน: 0 / 0</div>
-      
-      <div class="quiz-word-box">
-        <div class="quiz-word" id="quiz-word">Garden</div>
-        <button class="btn-audio" onclick="speakQuizWord()">🔊</button>
-      </div>
-
-      <div class="options-grid" id="options-container">
-        <!-- 4 Multiple Choice Options Generated dynamically -->
-      </div>
-
-      <button class="btn-random" id="next-quiz-btn" style="display:none;" onclick="loadNextQuiz()">ข้อถัดไป ►</button>
-    </div>
-
+  <div style="margin-bottom: 10px;">
+    <select id="accent-select">
+      <option value="en-US">English (US)</option>
+      <option value="en-GB">English (UK)</option>
+    </select>
   </div>
 
-<script>
+  <div class="card-container" onclick="flipCard()">
+    <div class="card" id="card">
+      <div class="card-face card-front">
+        <div class="word" id="card-word">Loading...</div>
+        <div class="pos" id="card-pos"></div>
+        <button onclick="speakCurrentWord(event)" style="margin-top:10px;">🔊 อ่านออกเสียง</button>
+      </div>
+      <div class="card-face card-back">
+        <div class="meaning" id="card-meaning"></div>
+        <div class="synonyms" id="card-synonyms"></div>
+        <div class="example" id="card-example"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <span id="progress">0 / 0</span>
+    <span id="stat-learned" style="color: green;">จำได้แล้ว: 0</span>
+    <span id="stat-review" style="color: red;">ต้องทบทวน: 0</span>
+  </div>
+
+  <div class="controls">
+    <button onclick="prevCard()">◀ ก่อนหน้า</button>
+    <button onclick="markMemory(true)" style="background:#28a745;">จำได้</button>
+    <button onclick="markMemory(false)" style="background:#dc3545;">ทบทวน</button>
+    <button onclick="randomCard()" style="background:#6c757d;">🎲 สุ่ม</button>
+    <button onclick="nextCard()">ถัดไป ▶</button>
+  </div>
+
+  <script>
     const vocabularyDB = [
-      { word: "Garden", pos: "Noun", meaning: "สวน", synonyms: "yard, lawn, park", example: "They spent the afternoon working in the garden.", level: "A2" },
-      { word: "Abandon", pos: "Verb", meaning: "ละทิ้ง, ยกเลิก", synonyms: "desert, leave, forsake", example: "They had to abandon their car in the heavy snowstorm.", level: "B2" },
-      { word: "Ubiquitous", pos: "Adjective", meaning: "มีอยู่ทุกหนทุกแห่ง", synonyms: "omnipresent, pervasive, everywhere", example: "Smartphones have become ubiquitous in daily life.", level: "C1" },
-      { word: "Borrow", pos: "Verb", meaning: "ยืม", synonyms: "take temporarily, acquire on loan", example: "Can I borrow your pen for a second?", level: "A2" },
-      { word: "Ephemeral", pos: "Adjective", meaning: "ชั่วคราว, คงอยู่สั้นๆ", synonyms: "transient, fleeting, short-lived", example: "Fame in the digital age can be remarkably ephemeral.", level: "C2" },
-      { word: "Plausible", pos: "Adjective", meaning: "น่าเชื่อถือ, เป็นไปได้", synonyms: "credible, reasonable, believable", example: "She provided a plausible explanation for her absence.", level: "B2" },
-      { word: "Decide", pos: "Verb", meaning: "ตัดสินใจ", synonyms: "determine, choose, resolve", example: "I cannot decide which dress to wear to the party.", level: "A2" },
-      { word: "Resilient", pos: "Adjective", meaning: "ฟื้นตัวได้เร็ว, ยืดหยุ่น", synonyms: "tough, adaptable, strong", example: "Children are often remarkably resilient after tough situations.", level: "B2" },
-      { word: "Acquiesce", pos: "Verb", meaning: "ยินยอมโดยจำใจ", synonyms: "comply, consent, submit", example: "He decided to acquiesce to his boss's demanding requests.", level: "C2" },
-      { word: "Frightened", pos: "Adjective", meaning: "รู้สึกกลัว", synonyms: "scared, terrified, alarmed", example: "The loud noise made the child frightened.", level: "A2" },
-      { word: "Eloquent", pos: "Adjective", meaning: "พูดจาสละสลวย, คมคาย", synonyms: "articulate, expressive, fluent", example: "She delivered an eloquent speech at the opening ceremony.", level: "C1" },
-      { word: "Pragmatic", pos: "Adjective", meaning: "เน้นการปฏิบัติจริง", synonyms: "practical, realistic, sensible", example: "We need a pragmatic approach to solve this issue quickly.", level: "B2" },
-      { word: "Surprise", pos: "Verb / Noun", meaning: "ทำให้ประหลาดใจ / การประหลาดใจ", synonyms: "astonish, amaze, shock", example: "His sudden visit was a pleasant surprise.", level: "A2" },
-      { word: "Juxtapose", pos: "Verb", meaning: "วางคู่กันเพื่อเปรียบเทียบ", synonyms: "compare, contrast, side-by-side", example: "The exhibition juxtaposes modern art with classical sculptures.", level: "C2" },
-      { word: "Collaborate", pos: "Verb", meaning: "ร่วมมือ", synonyms: "cooperate, work together, join forces", example: "Teams must collaborate effectively to achieve the goal.", level: "B2" },
-      { word: "Ineffable", pos: "Adjective", meaning: "อธิบายเป็นคำพูดไม่ได้", synonyms: "indescribable, unspeakable, inexpressible", example: "The natural beauty of the mountain summit was ineffable.", level: "C2" },
-      { word: "Advise", pos: "Verb", meaning: "ให้คำแนะนำ", synonyms: "recommend, suggest, counsel", example: "I advise you to study for the test in advance.", level: "A2" },
-      { word: "Meticulous", pos: "Adjective", meaning: "พิถีพิถัน, ละเอียดถี่ถ้วน", synonyms: "thorough, careful, diligent", example: "He was meticulous about keeping his financial records clean.", level: "C1" },
-      { word: "Deleterious", pos: "Adjective", meaning: "เป็นอันตราย, ส่งผลเสีย", synonyms: "harmful, damaging, detrimental", example: "Smoking has serious and deleterious effects on human health.", level: "C2" },
-      { word: "Dangerous", pos: "Adjective", meaning: "อันตราย", synonyms: "unsafe, risky, hazardous", example: "It is dangerous to drive fast in heavy rain.", level: "A2" },
-      { word: "Ambiguous", pos: "Adjective", meaning: "คลุมเครือ, กำกวม", synonyms: "unclear, vague, uncertain", example: "His ambiguous answer left everyone in the room confused.", level: "B2" },
-      { word: "Serendipity", pos: "Noun", meaning: "การมีโชคโดยบังเอิญ", synonyms: "chance, coincidence, happy accident", example: "Finding this rare vintage book was pure serendipity.", level: "C2" },
-      { word: "Polite", pos: "Adjective", meaning: "สุภาพ", synonyms: "courteous, respectful, mannerly", example: "He is always polite to his teachers and classmates.", level: "A2" },
-      { word: "Scrutinize", pos: "Verb", meaning: "พินิจพิเคราะห์, ตรวจสอบอย่างละเอียด", synonyms: "examine, inspect, analyze", example: "The auditor will scrutinize all financial documents today.", level: "C1" },
-      { word: "Pervasive", pos: "Adjective", meaning: "แพร่กระจายไปทั่ว", synonyms: "widespread, extensive, prevailing", example: "The pervasive influence of technology is undeniable.", level: "C1" },
-      { word: "Improve", pos: "Verb", meaning: "ปรับปรุง, พัฒนา", synonyms: "enhance, better, upgrade", example: "Daily practice will help improve your English skills.", level: "A2" },
-      { word: "Benevolent", pos: "Adjective", meaning: "เมตตากรุณา, ใจดี", synonyms: "kind, generous, charitable", example: "The benevolent donor gifted millions to the hospital.", level: "C1" },
-      { word: "Accident", pos: "Noun", meaning: "อุบัติเหตุ", synonyms: "mishap, crash, collision", example: "She hurt her leg in a car accident yesterday.", level: "A2" },
-      { word: "Candid", pos: "Adjective", meaning: "ตรงไปตรงมา, จริงใจ", synonyms: "frank, honest, straightforward", example: "He gave a candid opinion about the new proposal.", level: "B2" },
-      { word: "Superfluous", pos: "Adjective", meaning: "เกินความจำเป็น, ฟุ่มเฟือย", synonyms: "unnecessary, excess, redundant", example: "Please delete any superfluous details from the report.", level: "C2" },
-      { word: "Diligence", pos: "Noun", meaning: "ความขยันหมั่นเพียร", synonyms: "persistency, effort, dedication", example: "Her diligence led to a well-deserved promotion.", level: "B2" },
-      { word: "Achieve", pos: "Verb", meaning: "บรรลุเป้าหมาย, สำเร็จ", synonyms: "accomplish, attain, reach", example: "Work hard if you want to achieve your dreams.", level: "A2" },
-      { word: "Fastidious", pos: "Adjective", meaning: "จู้จี้, พิถีพิถันเกินไป", synonyms: "fussy, demanding, choosy", example: "He is extremely fastidious about his personal attire.", level: "C2" },
-      { word: "Empathy", pos: "Noun", meaning: "ความเข้าอกเข้าใจผู้อื่น", synonyms: "compassion, understanding, sympathy", example: "A good leader must show empathy toward team members.", level: "B2" },
-      { word: "Esoteric", pos: "Adjective", meaning: "เข้าใจเฉพาะกลุ่ม, ลึกลับ", synonyms: "obscure, mysterious, arcane", example: "The poem was full of esoteric philosophical allusions.", level: "C2" },
-      { word: "Annoy", pos: "Verb", meaning: "รบกวน, ทำให้รำคาญ", synonyms: "bother, irritate, disturb", example: "Loud sounds annoy me when I am studying.", level: "A2" },
-      { word: "Lucid", pos: "Adjective", meaning: "เข้าใจง่าย, ชัดเจน", synonyms: "clear, coherent, understandable", example: "The professor gave a lucid explanation of quantum physics.", level: "C1" },
-      { word: "Mitigate", pos: "Verb", meaning: "บรรเทา, ทำให้เบาลง", synonyms: "alleviate, reduce, lessen", example: "Tree planting helps mitigate the impacts of climate change.", level: "B2" },
-      { word: "Anxious", pos: "Adjective", meaning: "วิตกกังวล", synonyms: "worried, nervous, uneasy", example: "She felt anxious before stepping onto the stage.", level: "A2" },
-      { word: "Voracious", pos: "Adjective", meaning: "ตะกละ, มูมมาม, กระหายมาก", synonyms: "insatiable, ravenous, avid", example: "He is a voracious reader who consumes books quickly.", level: "C2" },
-      { word: "Superficial", pos: "Adjective", meaning: "ผิวเผิน, ไม่ลึกซึ้ง", synonyms: "shallow, surface-level, cursory", example: "They only have a superficial knowledge of the topic.", level: "B2" },
-      { word: "Bargain", pos: "Noun / Verb", meaning: "ของราคาถูก / ต่อรองราคา", synonyms: "deal, discount, negotiate", example: "I bought this shirt on sale; it was a real bargain.", level: "A2" },
-      { word: "Nefarious", pos: "Adjective", meaning: "ชั่วร้าย, เลวทราม", synonyms: "wicked, evil, villainous", example: "The villain executed his nefarious plan in secret.", level: "C2" },
-      { word: "Ostentatious", pos: "Adjective", meaning: "โอ้อวด, หรูหราเกินงาม", synonyms: "showy, flashy, pretentious", example: "Wearing a golden crown to brunch felt ostentatious.", level: "C1" },
-      { word: "Behavior", pos: "Noun", meaning: "พฤติกรรม, การกระทำ", synonyms: "conduct, actions, demeanor", example: "The teacher commended her excellent classroom behavior.", level: "A2" },
-      { word: "Capricious", pos: "Adjective", meaning: "เอาแน่เอานอนไม่ได้, เปลี่ยนแปลงง่าย", synonyms: "fickle, unpredictable, erratic", example: "The weather in spring can be quite capricious.", level: "C2" },
-      { word: "Constraint", pos: "Noun", meaning: "ข้อจำกัด, การบังคับ", synonyms: "limitation, restriction, restraint", example: "Budget constraints prevented us from hiring more staff.", level: "B2" },
-      { word: "Believe", pos: "Verb", meaning: "เชื่อ, เชื่อถือ", synonyms: "trust, accept, suppose", example: "I believe that honesty is always the best policy.", level: "A2" },
-      { word: "Enigmatic", pos: "Adjective", meaning: "ลึกลับ, เป็นปริศนา", synonyms: "mysterious, puzzling, cryptic", example: "Mona Lisa is famous for her enigmatic smile.", level: "C1" },
-      { word: "Disparate", pos: "Adjective", meaning: "แตกต่างกันอย่างสิ้นเชิง", synonyms: "different, contrasting, diverse", example: "They brought together disparate ideas to make a solution.", level: "C2" },
-      { word: "Celebrate", pos: "Verb", meaning: "ฉลอง, สังสรรค์", synonyms: "commemorate, rejoice, observe", example: "We will gather tonight to celebrate his graduation.", level: "A2" },
-      { word: "Sycophant", pos: "Noun", meaning: "คนประจบประแจง", synonyms: "flatterer, parasite, yes-man", example: "The CEO was surrounded by sycophants who agreed with everything.", level: "C2" },
-      { word: "Divergent", pos: "Adjective", meaning: "ที่แตกต่างออกไป, แตกแยก", synonyms: "differing, deviating, conflicting", example: "They parted ways due to divergent political views.", level: "B2" },
-      { word: "Century", pos: "Noun", meaning: "ศตวรรษ (100 ปี)", synonyms: "100 years, centennial", example: "This cathedral was built back in the sixteenth century.", level: "A2" },
-      { word: "Perfunctory", pos: "Adjective", meaning: "ทำพอเป็นพิธี, ทำส่งเดช", synonyms: "cursory, careless, mechanical", example: "He gave a perfunctory nod before walking away.", level: "C2" },
-      { word: "Exacerbate", pos: "Verb", meaning: "ทำให้แย่ลง, ทำให้รุนแรงขึ้น", synonyms: "worsen, aggravate, intensify", example: "Scratching the rash will only exacerbate the infection.", level: "C1" },
-      { word: "Compare", pos: "Verb", meaning: "เปรียบเทียบ", synonyms: "contrast, correlate, match", example: "If you compare the prices, this one is much cheaper.", level: "A2" },
-      { word: "Tenacious", pos: "Adjective", meaning: "ทรหด, ไม่ยอมแพ้, เหนียวแน่น", synonyms: "persistent, determined, firm", example: "Her tenacious effort helped her win the championship.", level: "C1" },
-      { word: "Formidable", pos: "Adjective", meaning: "น่ากลัว, ยิ่งใหญ่จนน่าเกรงขาม", synonyms: "intimidating, impressive, fierce", example: "The opposing team has a formidable reputation.", level: "B2" },
-      { word: "Delicious", pos: "Adjective", meaning: "อร่อย", synonyms: "tasty, flavorful, yummy", example: "My grandmother cooked a delicious meal for us.", level: "A2" },
-      { word: "Anachronism", pos: "Noun", meaning: "สิ่งผิดยุคผิดสมัย", synonyms: "mismatch, misplacement, relic", example: "A smartphone in a medieval movie is an anachronism.", level: "C2" },
-      { word: "Axiom", pos: "Noun", meaning: "ความจริงที่ยอมรับกันทั่วไป", synonyms: "maxim, truism, principle", example: "It is an accepted axiom that honesty builds trust.", level: "C2" },
-      { word: "Describe", pos: "Verb", meaning: "อธิบาย, บรรยายลักษณะ", synonyms: "explain, portray, depict", example: "Can you describe what the suspect was wearing?", level: "A2" },
-      { word: "Profound", pos: "Adjective", meaning: "ลึกซึ้ง, ลึกล้ำ", synonyms: "deep, insightful, intense", example: "The book had a profound impact on his thinking.", level: "C1" },
-      { word: "Elicit", pos: "Verb", meaning: "ดึงออกมา, เค้นข้อมูล", synonyms: "evoke, extract, obtain", example: "The survey aimed to elicit honest feedback from customers.", level: "B2" },
-      { word: "Discuss", pos: "Verb", meaning: "หารือ, พูดคุยแลกเปลี่ยน", synonyms: "debate, converse, talk about", example: "We need to discuss our strategy for the new project.", level: "A2" },
-      { word: "Pugnacious", pos: "Adjective", meaning: "ชอบทะเลาะวิวาท, ชอบหาเรื่อง", synonyms: "combative, aggressive, belligerent", example: "His pugnacious attitude got him into trouble constantly.", level: "C2" },
-      { word: "Transient", pos: "Adjective", meaning: "ชั่วคราว, สั้นๆ", synonyms: "temporary, brief, impermanent", example: "The storm was transient and cleared up within an hour.", level: "B2" },
-      { word: "Expensive", pos: "Adjective", meaning: "แพง, มีราคาเป็นเงินมาก", synonyms: "costly, high-priced, pricey", example: "Buying a luxury sports car is very expensive.", level: "A2" },
-      { word: "Veracity", pos: "Noun", meaning: "ความจริงแท้, ความถูกต้อง", synonyms: "truthfulness, accuracy, honesty", example: "We questioned the veracity of his statement.", level: "C2" },
-      { word: "Magnanimous", pos: "Adjective", meaning: "ใจกว้าง, ใจบุญ", synonyms: "generous, forgiving, noble", example: "He was magnanimous in victory, praising his opponent.", level: "C1" },
-      { word: "Explain", pos: "Verb", meaning: "อธิบายให้เข้าใจ", synonyms: "clarify, demonstrate, illustrate", example: "Please explain how to solve this math problem.", level: "A2" },
-      { word: "Quintessential", pos: "Adjective", meaning: "ที่เป็นตัวแทนอันสมบูรณ์แบบ", synonyms: "typical, classic, ultimate", example: "Tea is considered the quintessential British beverage.", level: "C2" },
-      { word: "Superfluity", pos: "Noun", meaning: "ส่วนเกิน, ความฟุ่มเฟือย", synonyms: "excess, surplus, redundancy", example: "There is a superfluity of words in this essay.", level: "C2" },
-      { word: "Favorite", pos: "Adjective", meaning: "ที่ชื่นชอบมากที่สุด", synonyms: "preferred, beloved, chosen", example: "Chocolate ice cream is my absolute favorite dessert.", level: "A2" },
-      { word: "Recalcitrant", pos: "Adjective", meaning: "ดื้อดึง, ต่อต้านผู้มีอำนาจ", synonyms: "unruly, disobedient, stubborn", example: "The recalcitrant student refused to follow rules.", level: "C2" },
-      { word: "Spurious", pos: "Adjective", meaning: "ปลอม, ไม่จริง", synonyms: "false, fake, bogus", example: "He was arrested for making spurious claims to police.", level: "C2" },
-      { word: "Generous", pos: "Adjective", meaning: "ใจกว้าง, เอื้อเฟื้อ", synonyms: "kind, charitable, unselfish", example: "Thank you for your generous contribution to charity.", level: "A2" },
-      { word: "Obfuscate", pos: "Verb", meaning: "ทำให้สับสน, ทำให้คลุมเครือ", synonyms: "confuse, obscure, muddle", example: "Do not try to obfuscate the facts with technical jargon.", level: "C2" },
-      { word: "Iconoclast", pos: "Noun", meaning: "ผู้ต่อต้านความเชื่อเดิมๆ", synonyms: "rebel, radical, dissenter", example: "As an iconoclast, she challenged traditional art norms.", level: "C2" },
-<script>
-    const vocabularyDB = [
-      { word: "Garden", pos: "Noun", meaning: "สวน", synonyms: "yard, lawn, park", example: "They spent the afternoon working in the garden.", level: "A2" },
-      { word: "Abandon", pos: "Verb", meaning: "ละทิ้ง, ยกเลิก", synonyms: "desert, leave, forsake", example: "They had to abandon their car in the heavy snowstorm.", level: "B2" },
-      { word: "Ubiquitous", pos: "Adjective", meaning: "มีอยู่ทุกหนทุกแห่ง", synonyms: "omnipresent, pervasive, everywhere", example: "Smartphones have become ubiquitous in daily life.", level: "C1" },
-      { word: "Borrow", pos: "Verb", meaning: "ยืม", synonyms: "take temporarily, acquire on loan", example: "Can I borrow your pen for a second?", level: "A2" },
-      { word: "Ephemeral", pos: "Adjective", meaning: "ชั่วคราว, คงอยู่สั้นๆ", synonyms: "transient, fleeting, short-lived", example: "Fame in the digital age can be remarkably ephemeral.", level: "C2" },
-      { word: "Plausible", pos: "Adjective", meaning: "น่าเชื่อถือ, เป็นไปได้", synonyms: "credible, reasonable, believable", example: "She provided a plausible explanation for her absence.", level: "B2" },
-      { word: "Decide", pos: "Verb", meaning: "ตัดสินใจ", synonyms: "determine, choose, resolve", example: "I cannot decide which dress to wear to the party.", level: "A2" },
-      { word: "Resilient", pos: "Adjective", meaning: "ฟื้นตัวได้เร็ว, ยืดหยุ่น", synonyms: "tough, adaptable, strong", example: "Children are often remarkably resilient after tough situations.", level: "B2" },
-      { word: "Acquiesce", pos: "Verb", meaning: "ยินยอมโดยจำใจ", synonyms: "comply, consent, submit", example: "He decided to acquiesce to his boss's demanding requests.", level: "C2" },
-      { word: "Frightened", pos: "Adjective", meaning: "รู้สึกกลัว", synonyms: "scared, terrified, alarmed", example: "The loud noise made the child frightened.", level: "A2" },
-      { word: "Eloquent", pos: "Adjective", meaning: "พูดจาสละสลวย, คมคาย", synonyms: "articulate, expressive, fluent", example: "She delivered an eloquent speech at the opening ceremony.", level: "C1" },
-      { word: "Pragmatic", pos: "Adjective", meaning: "เน้นการปฏิบัติจริง", synonyms: "practical, realistic, sensible", example: "We need a pragmatic approach to solve this issue quickly.", level: "B2" },
-      { word: "Surprise", pos: "Verb / Noun", meaning: "ทำให้ประหลาดใจ / การประหลาดใจ", synonyms: "astonish, amaze, shock", example: "His sudden visit was a pleasant surprise.", level: "A2" },
-      { word: "Juxtapose", pos: "Verb", meaning: "วางคู่กันเพื่อเปรียบเทียบ", synonyms: "compare, contrast, side-by-side", example: "The exhibition juxtaposes modern art with classical sculptures.", level: "C2" },
-      { word: "Collaborate", pos: "Verb", meaning: "ร่วมมือ", synonyms: "cooperate, work together, join forces", example: "Teams must collaborate effectively to achieve the goal.", level: "B2" },
-      { word: "Ineffable", pos: "Adjective", meaning: "อธิบายเป็นคำพูดไม่ได้", synonyms: "indescribable, unspeakable, inexpressible", example: "The natural beauty of the mountain summit was ineffable.", level: "C2" },
-      { word: "Advise", pos: "Verb", meaning: "ให้คำแนะนำ", synonyms: "recommend, suggest, counsel", example: "I advise you to study for the test in advance.", level: "A2" },
-      { word: "Meticulous", pos: "Adjective", meaning: "พิถีพิถัน, ละเอียดถี่ถ้วน", synonyms: "thorough, careful, diligent", example: "He was meticulous about keeping his financial records clean.", level: "C1" },
-      { word: "Deleterious", pos: "Adjective", meaning: "เป็นอันตราย, ส่งผลเสีย", synonyms: "harmful, damaging, detrimental", example: "Smoking has serious and deleterious effects on human health.", level: "C2" },
-      { word: "Dangerous", pos: "Adjective", meaning: "อันตราย", synonyms: "unsafe, risky, hazardous", example: "It is dangerous to drive fast in heavy rain.", level: "A2" },
-      { word: "Ambiguous", pos: "Adjective", meaning: "คลุมเครือ, กำกวม", synonyms: "unclear, vague, uncertain", example: "His ambiguous answer left everyone in the room confused.", level: "B2" },
-      { word: "Serendipity", pos: "Noun", meaning: "การมีโชคโดยบังเอิญ", synonyms: "chance, coincidence, happy accident", example: "Finding this rare vintage book was pure serendipity.", level: "C2" },
-      { word: "Polite", pos: "Adjective", meaning: "สุภาพ", synonyms: "courteous, respectful, mannerly", example: "He is always polite to his teachers and classmates.", level: "A2" },
-      { word: "Scrutinize", pos: "Verb", meaning: "พินิจพิเคราะห์, ตรวจสอบอย่างละเอียด", synonyms: "examine, inspect, analyze", example: "The auditor will scrutinize all financial documents today.", level: "C1" },
-      { word: "Pervasive", pos: "Adjective", meaning: "แพร่กระจายไปทั่ว", synonyms: "widespread, extensive, prevailing", example: "The pervasive influence of technology is undeniable.", level: "C1" },
-      { word: "Improve", pos: "Verb", meaning: "ปรับปรุง, พัฒนา", synonyms: "enhance, better, upgrade", example: "Daily practice will help improve your English skills.", level: "A2" },
-      { word: "Benevolent", pos: "Adjective", meaning: "เมตตากรุณา, ใจดี", synonyms: "kind, generous, charitable", example: "The benevolent donor gifted millions to the hospital.", level: "C1" },
-      { word: "Accident", pos: "Noun", meaning: "อุบัติเหตุ", synonyms: "mishap, crash, collision", example: "She hurt her leg in a car accident yesterday.", level: "A2" },
-      { word: "Candid", pos: "Adjective", meaning: "ตรงไปตรงมา, จริงใจ", synonyms: "frank, honest, straightforward", example: "He gave a candid opinion about the new proposal.", level: "B2" },
-      { word: "Superfluous", pos: "Adjective", meaning: "เกินความจำเป็น, ฟุ่มเฟือย", synonyms: "unnecessary, excess, redundant", example: "Please delete any superfluous details from the report.", level: "C2" },
-      { word: "Diligence", pos: "Noun", meaning: "ความขยันหมั่นเพียร", synonyms: "persistency, effort, dedication", example: "Her diligence led to a well-deserved promotion.", level: "B2" },
-      { word: "Achieve", pos: "Verb", meaning: "บรรลุเป้าหมาย, สำเร็จ", synonyms: "accomplish, attain, reach", example: "Work hard if you want to achieve your dreams.", level: "A2" },
-      { word: "Fastidious", pos: "Adjective", meaning: "จู้จี้, พิถีพิถันเกินไป", synonyms: "fussy, demanding, choosy", example: "He is extremely fastidious about his personal attire.", level: "C2" },
-      { word: "Empathy", pos: "Noun", meaning: "ความเข้าอกเข้าใจผู้อื่น", synonyms: "compassion, understanding, sympathy", example: "A good leader must show empathy toward team members.", level: "B2" },
-      { word: "Esoteric", pos: "Adjective", meaning: "เข้าใจเฉพาะกลุ่ม, ลึกลับ", synonyms: "obscure, mysterious, arcane", example: "The poem was full of esoteric philosophical allusions.", level: "C2" },
-      { word: "Annoy", pos: "Verb", meaning: "รบกวน, ทำให้รำคาญ", synonyms: "bother, irritate, disturb", example: "Loud sounds annoy me when I am studying.", level: "A2" },
-      { word: "Lucid", pos: "Adjective", meaning: "เข้าใจง่าย, ชัดเจน", synonyms: "clear, coherent, understandable", example: "The professor gave a lucid explanation of quantum physics.", level: "C1" },
-      { word: "Mitigate", pos: "Verb", meaning: "บรรเทา, ทำให้เบาลง", synonyms: "alleviate, reduce, lessen", example: "Tree planting helps mitigate the impacts of climate change.", level: "B2" },
-      { word: "Anxious", pos: "Adjective", meaning: "วิตกกังวล", synonyms: "worried, nervous, uneasy", example: "She felt anxious before stepping onto the stage.", level: "A2" },
-      { word: "Voracious", pos: "Adjective", meaning: "ตะกละ, มูมมาม, กระหายมาก", synonyms: "insatiable, ravenous, avid", example: "He is a voracious reader who consumes books quickly.", level: "C2" },
-      { word: "Superficial", pos: "Adjective", meaning: "ผิวเผิน, ไม่ลึกซึ้ง", synonyms: "shallow, surface-level, cursory", example: "They only have a superficial knowledge of the topic.", level: "B2" },
-      { word: "Bargain", pos: "Noun / Verb", meaning: "ของราคาถูก / ต่อรองราคา", synonyms: "deal, discount, negotiate", example: "I bought this shirt on sale; it was a real bargain.", level: "A2" },
-      { word: "Nefarious", pos: "Adjective", meaning: "ชั่วร้าย, เลวทราม", synonyms: "wicked, evil, villainous", example: "The villain executed his nefarious plan in secret.", level: "C2" },
-      { word: "Ostentatious", pos: "Adjective", meaning: "โอ้อวด, หรูหราเกินงาม", synonyms: "showy, flashy, pretentious", example: "Wearing a golden crown to brunch felt ostentatious.", level: "C1" },
-      { word: "Behavior", pos: "Noun", meaning: "พฤติกรรม, การกระทำ", synonyms: "conduct, actions, demeanor", example: "The teacher commended her excellent classroom behavior.", level: "A2" },
-      { word: "Capricious", pos: "Adjective", meaning: "เอาแน่เอานอนไม่ได้, เปลี่ยนแปลงง่าย", synonyms: "fickle, unpredictable, erratic", example: "The weather in spring can be quite capricious.", level: "C2" },
-      { word: "Constraint", pos: "Noun", meaning: "ข้อจำกัด, การบังคับ", synonyms: "limitation, restriction, restraint", example: "Budget constraints prevented us from hiring more staff.", level: "B2" },
-      { word: "Believe", pos: "Verb", meaning: "เชื่อ, เชื่อถือ", synonyms: "trust, accept, suppose", example: "I believe that honesty is always the best policy.", level: "A2" },
-      { word: "Enigmatic", pos: "Adjective", meaning: "ลึกลับ, เป็นปริศนา", synonyms: "mysterious, puzzling, cryptic", example: "Mona Lisa is famous for her enigmatic smile.", level: "C1" },
-      { word: "Disparate", pos: "Adjective", meaning: "แตกต่างกันอย่างสิ้นเชิง", synonyms: "different, contrasting, diverse", example: "They brought together disparate ideas to make a solution.", level: "C2" },
-      { word: "Celebrate", pos: "Verb", meaning: "ฉลอง, สังสรรค์", synonyms: "commemorate, rejoice, observe", example: "We will gather tonight to celebrate his graduation.", level: "A2" },
-      { word: "Sycophant", pos: "Noun", meaning: "คนประจบประแจง", synonyms: "flatterer, parasite, yes-man", example: "The CEO was surrounded by sycophants who agreed with everything.", level: "C2" },
-      { word: "Divergent", pos: "Adjective", meaning: "ที่แตกต่างออกไป, แตกแยก", synonyms: "differing, deviating, conflicting", example: "They parted ways due to divergent political views.", level: "B2" },
-      { word: "Century", pos: "Noun", meaning: "ศตวรรษ (100 ปี)", synonyms: "100 years, centennial", example: "This cathedral was built back in the sixteenth century.", level: "A2" },
-      { word: "Perfunctory", pos: "Adjective", meaning: "ทำพอเป็นพิธี, ทำส่งเดช", synonyms: "cursory, careless, mechanical", example: "He gave a perfunctory nod before walking away.", level: "C2" },
-      { word: "Exacerbate", pos: "Verb", meaning: "ทำให้แย่ลง, ทำให้รุนแรงขึ้น", synonyms: "worsen, aggravate, intensify", example: "Scratching the rash will only exacerbate the infection.", level: "C1" },
-      { word: "Compare", pos: "Verb", meaning: "เปรียบเทียบ", synonyms: "contrast, correlate, match", example: "If you compare the prices, this one is much cheaper.", level: "A2" },
-      { word: "Tenacious", pos: "Adjective", meaning: "ทรหด, ไม่ยอมแพ้, เหนียวแน่น", synonyms: "persistent, determined, firm", example: "Her tenacious effort helped her win the championship.", level: "C1" },
-      { word: "Formidable", pos: "Adjective", meaning: "น่ากลัว, ยิ่งใหญ่จนน่าเกรงขาม", synonyms: "intimidating, impressive, fierce", example: "The opposing team has a formidable reputation.", level: "B2" },
-      { word: "Delicious", pos: "Adjective", meaning: "อร่อย", synonyms: "tasty, flavorful, yummy", example: "My grandmother cooked a delicious meal for us.", level: "A2" },
-      { word: "Anachronism", pos: "Noun", meaning: "สิ่งผิดยุคผิดสมัย", synonyms: "mismatch, misplacement, relic", example: "A smartphone in a medieval movie is an anachronism.", level: "C2" },
-      { word: "Axiom", pos: "Noun", meaning: "ความจริงที่ยอมรับกันทั่วไป", synonyms: "maxim, truism, principle", example: "It is an accepted axiom that honesty builds trust.", level: "C2" },
-      { word: "Describe", pos: "Verb", meaning: "อธิบาย, บรรยายลักษณะ", synonyms: "explain, portray, depict", example: "Can you describe what the suspect was wearing?", level: "A2" },
-      { word: "Profound", pos: "Adjective", meaning: "ลึกซึ้ง, ลึกล้ำ", synonyms: "deep, insightful, intense", example: "The book had a profound impact on his thinking.", level: "C1" },
-      { word: "Elicit", pos: "Verb", meaning: "ดึงออกมา, เค้นข้อมูล", synonyms: "evoke, extract, obtain", example: "The survey aimed to elicit honest feedback from customers.", level: "B2" },
-      { word: "Discuss", pos: "Verb", meaning: "หารือ, พูดคุยแลกเปลี่ยน", synonyms: "debate, converse, talk about", example: "We need to discuss our strategy for the new project.", level: "A2" },
-      { word: "Pugnacious", pos: "Adjective", meaning: "ชอบทะเลาะวิวาท, ชอบหาเรื่อง", synonyms: "combative, aggressive, belligerent", example: "His pugnacious attitude got him into trouble constantly.", level: "C2" },
-      { word: "Transient", pos: "Adjective", meaning: "ชั่วคราว, สั้นๆ", synonyms: "temporary, brief, impermanent", example: "The storm was transient and cleared up within an hour.", level: "B2" },
-      { word: "Expensive", pos: "Adjective", meaning: "แพง, มีราคาเป็นเงินมาก", synonyms: "costly, high-priced, pricey", example: "Buying a luxury sports car is very expensive.", level: "A2" },
-      { word: "Veracity", pos: "Noun", meaning: "ความจริงแท้, ความถูกต้อง", synonyms: "truthfulness, accuracy, honesty", example: "We questioned the veracity of his statement.", level: "C2" },
-      { word: "Magnanimous", pos: "Adjective", meaning: "ใจกว้าง, ใจบุญ", synonyms: "generous, forgiving, noble", example: "He was magnanimous in victory, praising his opponent.", level: "C1" },
-      { word: "Explain", pos: "Verb", meaning: "อธิบายให้เข้าใจ", synonyms: "clarify, demonstrate, illustrate", example: "Please explain how to solve this math problem.", level: "A2" },
-      { word: "Quintessential", pos: "Adjective", meaning: "ที่เป็นตัวแทนอันสมบูรณ์แบบ", synonyms: "typical, classic, ultimate", example: "Tea is considered the quintessential British beverage.", level: "C2" },
-      { word: "Superfluity", pos: "Noun", meaning: "ส่วนเกิน, ความฟุ่มเฟือย", synonyms: "excess, surplus, redundancy", example: "There is a superfluity of words in this essay.", level: "C2" },
-      { word: "Favorite", pos: "Adjective", meaning: "ที่ชื่นชอบมากที่สุด", synonyms: "preferred, beloved, chosen", example: "Chocolate ice cream is my absolute favorite dessert.", level: "A2" },
-      { word: "Recalcitrant", pos: "Adjective", meaning: "ดื้อดึง, ต่อต้านผู้มีอำนาจ", synonyms: "unruly, disobedient, stubborn", example: "The recalcitrant student refused to follow rules.", level: "C2" },
-      { word: "Spurious", pos: "Adjective", meaning: "ปลอม, ไม่จริง", synonyms: "false, fake, bogus", example: "He was arrested for making spurious claims to police.", level: "C2" },
-      { word: "Generous", pos: "Adjective", meaning: "ใจกว้าง, เอื้อเฟื้อ", synonyms: "kind, charitable, unselfish", example: "Thank you for your generous contribution to charity.", level: "A2" },
-      { word: "Obfuscate", pos: "Verb", meaning: "ทำให้สับสน, ทำให้คลุมเครือ", synonyms: "confuse, obscure, muddle", example: "Do not try to obfuscate the facts with technical jargon.", level: "C2" },
-      { word: "Iconoclast", pos: "Noun", meaning: "ผู้ต่อต้านความเชื่อเดิมๆ", synonyms: "rebel, radical, dissenter", example: "As an iconoclast, she challenged traditional art norms.", level: "C2" },
-      { word: "Healthy", pos: "Adjective", meaning: "สุขภาพดี, แข็งแรง", synonyms: "fit, well, wholesome", example: "Eating vegetables helps you maintain a healthy body.", level: "A2" },
-      { word: "Parsimonious", pos: "Adjective", meaning: "ตระหนี่, ขี้เหนียว", synonyms: "stingy, frugal, miserly", example: "The parsimonious man refused to tip the waiter.", level: "C2" },
-      { word: "Alleviate", pos: "Verb", meaning: "บรรเทา, ทำให้เบาบางลง", synonyms: "relieve, ease, soothe", example: "Medicine will help alleviate your headache.", level: "B2" },
-      { word: "Imagine", pos: "Verb", meaning: "จินตนาการ, นึกภาพ", synonyms: "picture, visualize, suppose", example: "Can you imagine living on another planet?", level: "A2" },
-      { word: "Loquacious", pos: "Adjective", meaning: "ช่างพูด, พูดมาก", synonyms: "talkative, garrulous, chatty", example: "The loquacious host kept the party lively all night.", level: "C2" },
-      { word: "Acumen", pos: "Noun", meaning: "ความเฉียบแหลม, ความปัญญาไว", synonyms: "shrewdness, insight, sharpness", example: "His business acumen helped the startup grow rapidly.", level: "C1" },
-      { word: "Journey", pos: "Noun", meaning: "การเดินทาง", synonyms: "trip, voyage, expedition", example: "They embarked on a long journey across the country.", level: "A2" },
-      { word: "Intransigent", pos: "Adjective", meaning: "ไม่ยอมผ่อนปรน, ดื้อรั้น", synonyms: "uncompromising, stubborn, rigid", example: "Negotiations failed because both sides remained intransigent.", level: "C2" },
-      { word: "Punctilious", pos: "Adjective", meaning: "เจ้าระเบียบ, ละเอียดรอบคอบ", synonyms: "scrupulous, precise, exact", example: "He was punctilious about etiquette and good manners.", level: "C2" },
-      { word: "Knowledge", pos: "Noun", meaning: "ความรู้", synonyms: "understanding, wisdom, awareness", example: "Reading books expands your general knowledge.", level: "A2" },
-      { word: "Venerable", pos: "Adjective", meaning: "น่าเคารพนับถือ, เก่าแก่", synonyms: "respected, revered, honored", example: "The venerable professor retired after fifty years.", level: "C2" },
-      { word: "Insidious", pos: "Adjective", meaning: "ร้ายเงียบ, ร้ายกาจอย่างซ่อนเร้น", synonyms: "stealthy, subtle, treacherous", example: "High blood pressure is an insidious health hazard.", level: "C2" },
-      { word: "Language", pos: "Noun", meaning: "ภาษา", synonyms: "tongue, speech, dialect", example: "English is a widely spoken global language.", level: "A2" },
-      { word: "Lugubrious", pos: "Adjective", meaning: "เศร้าสร้อย, สลดใจ", synonyms: "mournful, gloomy, sad", example: "His lugubrious tone suggested bad news was coming.", level: "C2" },
-      { word: "Reciprocate", pos: "Verb", meaning: "ตอบแทน, ตอบสนองกลับ", synonyms: "requite, return, respond", example: "I would like to reciprocate your kind hospitality.", level: "C1" },
-      { word: "Practice", pos: "Verb / Noun", meaning: "ฝึกฝน / การฝึกซ้อม", synonyms: "rehearse, train, exercise", example: "You need more practice to master the guitar.", level: "A2" },
-      { word: "Ebullient", pos: "Adjective", meaning: "ร่าเริงกระตือรือร้น, ร่าเริงเกินร้อย", synonyms: "exuberant, buoyant, enthusiastic", example: "Her ebullient personality brightened up the whole room.", level: "C2" },
-      { word: "Insouciant", pos: "Adjective", meaning: "ไร้กังวล, ไม่แยแส", synonyms: "nonchalant, carefree, indifferent", example: "He had an insouciant attitude toward his financial problems.", level: "C2" }
+      { word: "Abandon", pos: "Verb", meaning: "ละทิ้ง, ยกเลิก", synonyms: "desert, leave", example: "They abandoned the car.", level: "B2" },
+      { word: "Ubiquitous", pos: "Adjective", meaning: "มีอยู่ทุกหนทุกแห่ง", synonyms: "omnipresent", example: "Smartphones are ubiquitous.", level: "C1" },
+      { word: "Resilient", pos: "Adjective", meaning: "ฟื้นตัวได้เร็ว", synonyms: "tough, adaptable", example: "Children are resilient.", level: "B2" }
     ];
 
     let currentIndex = 0;
@@ -610,9 +72,7 @@
 
     function flipCard() {
       const card = document.getElementById("card");
-      if (card) {
-        card.classList.toggle("flipped");
-      }
+      if (card) card.classList.toggle("flipped");
     }
 
     function speakCurrentWord(event) {
@@ -661,7 +121,6 @@
       document.getElementById("card-meaning").innerText = data.meaning;
       document.getElementById("card-synonyms").innerText = "Synonyms: " + data.synonyms;
       document.getElementById("card-example").innerText = '"' + data.example + '"';
-      document.getElementById("card-level").innerText = data.level;
       document.getElementById("progress").innerText = (currentIndex + 1) + " / " + vocabularyDB.length;
       
       const card = document.getElementById("card");
@@ -670,82 +129,8 @@
       }
     }
 
+    // เริ่มต้นแสดงผล
     updateCardUI();
   </script>
-  
-// ตัวแปรควบคุมระบบ
-    let currentIndex = 0;
-    let learnedCount = 0;
-    let reviewCount = 0;
-
-    // 1. ฟังก์ชันพลิกการ์ด
-    function flipCard() {
-      const card = document.getElementById("card");
-      if (card) {
-        card.classList.toggle("flipped");
-      }
-    }
-
-    // 2. ฟังก์ชันออกเสียงคำศัพท์
-    function speakCurrentWord(event) {
-      if (event) event.stopPropagation();
-      const currentWord = vocabularyDB[currentIndex].word;
-      const accent = document.getElementById("accent-select").value;
-      const utterance = new SpeechSynthesisUtterance(currentWord);
-      utterance.lang = accent;
-      window.speechSynthesis.speak(utterance);
-    }
-
-    // 3. ฟังก์ชันเปลี่ยนคำศัพท์ถัดไป
-    function nextCard() {
-      if (currentIndex < vocabularyDB.length - 1) {
-        currentIndex++;
-        updateCardUI();
-      }
-    }
-
-    // 4. ฟังก์ชันย้อนกลับคำศัพท์
-    function prevCard() {
-      if (currentIndex > 0) {
-        currentIndex--;
-        updateCardUI();
-      }
-    }
-
-    // 5. ฟังก์ชันสุ่มคำศัพท์
-    function randomCard() {
-      currentIndex = Math.floor(Math.random() * vocabularyDB.length);
-      updateCardUI();
-    }
-
-    // 6. ฟังก์ชันบันทึกสถานะจำได้/ต้องทบทวน
-    function markMemory(isKnown) {
-      if (isKnown) {
-        learnedCount++;
-        document.getElementById("stat-learned").innerText = "จำได้แล้ว: " + learnedCount;
-      } else {
-        reviewCount++;
-        document.getElementById("stat-review").innerText = "ต้องทบทวน: " + reviewCount;
-      }
-      nextCard();
-    }
-
-    // 7. ฟังก์ชันอัปเดตข้อมูลบนหน้าการ์ด
-    function updateCardUI() {
-      const data = vocabularyDB[currentIndex];
-      document.getElementById("card-word").innerText = data.word;
-      document.getElementById("card-pos").innerText = data.pos;
-      document.getElementById("card-meaning").innerText = data.meaning;
-      document.getElementById("card-synonyms").innerText = "Synonyms: " + data.synonyms;
-      document.getElementById("card-example").innerText = '"' + data.example + '"';
-      document.getElementById("card-level").innerText = data.level;
-      document.getElementById("progress").innerText = (currentIndex + 1) + " / " + vocabularyDB.length;
-      
-      const card = document.getElementById("card");
-      if (card && card.classList.contains("flipped")) {
-        card.classList.remove("flipped");
-      }
-    }
-
-    // โหลดข้อมูลคำศัพท์แรกเมื่อเริ่มเปิดหน้าเว็บ
-    updateCardUI();
+</body>
+</html>
