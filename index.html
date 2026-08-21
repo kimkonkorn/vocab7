@@ -19,9 +19,15 @@
     button { padding: 8px 16px; border: none; border-radius: 6px; background: #007bff; color: white; cursor: pointer; font-size: 14px; }
     button:hover { background: #0056b3; }
     .stats { margin-top: 15px; font-size: 14px; display: flex; gap: 15px; }
+    .nav-buttons { margin-bottom: 15px; display: flex; gap: 10px; }
   </style>
 </head>
 <body>
+
+  <div class="nav-buttons">
+    <button onclick="switchMode('flashcard')">🎴 Flashcard</button>
+    <button onclick="switchMode('quiz')" style="background:#17a2b8;">📝 Quiz Mode</button>
+  </div>
 
   <div style="margin-bottom: 10px;">
     <select id="accent-select">
@@ -69,6 +75,14 @@
     let currentIndex = 0;
     let learnedCount = 0;
     let reviewCount = 0;
+
+    function switchMode(mode) {
+      if (mode === 'quiz') {
+        alert("ระบบ Quiz กำลังอยู่ในช่วงพัฒนา");
+      } else {
+        alert("อยู่ที่หน้า Flashcard");
+      }
+    }
 
     function flipCard() {
       const card = document.getElementById("card");
@@ -129,7 +143,6 @@
       }
     }
 
-    // เริ่มต้นแสดงผล
     updateCardUI();
   </script>
 </body>
