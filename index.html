@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vocabulary Flashcards</title>
+  <style>
+    body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background: #f0f2f5; margin: 0; }
+    .card-container { perspective: 1000px; width: 320px; height: 220px; cursor: pointer; }
+    .card { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); background: white; }
+    .card.flipped { transform: rotateY(180deg); }
+    .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; border-radius: 12px; }
+    .card-back { transform: rotateY(180deg); background: #fdfdfd; }
+    .word { font-size: 28px; font-weight: bold; margin-bottom: 8px; }
+    .pos { font-size: 14px; color: #666; font-style: italic; }
+    .meaning { font-size: 20px; color: #2c3e50; font-weight: bold; margin-bottom: 8px; }
+    .synonyms, .example { font-size: 13px; color: #555; text-align: center; margin-top: 4px; }
+    .controls { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+    button { padding: 8px 16px; border: none; border-radius: 6px; background: #007bff; color: white; cursor: pointer; font-size: 14px; }
+    button:hover { background: #0056b3; }
+    .stats { margin-top: 15px; font-size: 14px; display: flex; gap: 15px; }
+    .nav-buttons { margin-bottom: 15px; display: flex; gap: 10px; }
+  </style>
+</head>
+<body>
+
+  <div class="nav-buttons">
+    <button onclick="switchMode('flashcard')">🎴 Flashcard</button>
+    <button onclick="switchMode('quiz')" style="background:#17a2b8;">📝 Quiz Mode</button>
+  </div>
+
+  <div style="margin-bottom: 10px;">
+    <select id="accent-select">
+      <option value="en-US">English (US)</option>
+      <option value="en-GB">English (UK)</option>
+    </select>
+  </div>
+
+  <div class="card-container" onclick="flipCard()">
+    <div class="card" id="card">
+      <div class="card-face card-front">
+        <div class="word" id="card-word">Loading...</div>
+        <div class="pos" id="card-pos"></div>
+        <button onclick="speakCurrentWord(event)" style="margin-top:10px;">🔊 อ่านออกเสียง</button>
+      </div>
+      <div class="card-face card-back">
+        <div class="meaning" id="card-meaning"></div>
+        <div class="synonyms" id="card-synonyms"></div>
+        <div class="example" id="card-example"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <span id="progress">0 / 0</span>
+    <span id="stat-learned" style="color: green;">จำได้แล้ว: 0</span>
+    <span id="stat-review" style="color: red;">ต้องทบทวน: 0</span>
+  </div>
+
+  <div class="controls">
+    <button onclick="prevCard()">◀ ก่อนหน้า</button>
+    <button onclick="markMemory(true)" style="background:#28a745;">จำได้</button>
+    <button onclick="markMemory(false)" style="background:#dc3545;">ทบทวน</button>
+    <button onclick="randomCard()" style="background:#6c757d;">🎲 สุ่ม</button>
+    <button onclick="nextCard()">ถัดไป ▶</button>
+  </div>
+
+  <script>
+    const vocabularyDB = [
+      { word: "Abandon", pos: "Verb", meaning: "ละทิ้ง, ยกเลิก", synonyms: "desert, leave", example: "They abandoned the car.", level: "B2" },
+      { word: "Ubiquitous", pos: "Adjective", meaning: "มีอยู่ทุกหนทุกแห่ง", synonyms: "omnipresent", example: "Smartphones are ubiquitous.", level: "C1" },
+      { word: "Resilient", pos: "Adjective", meaning: "ฟื้นตัวได้เร็ว", synonyms: "tough, adaptable", example: "Children are resilient.", level: "B2" }
+    ];
+
+    let currentIndex = 0;
+    let learnedCount = 0;
+    let reviewCount = 0;
+
+    function switchMode(mode) {
+      if (mode === 'quiz') {
+        alert("ระบบ Quiz กำลังอยู่ในช่วงพัฒนา");
+      } else {
+        alert("อยู่ที่หน้า Flashcard");
+      }
+    }
+
+    function flipCard() {
+      const card = document.getElementById("card");
+      if (card) card.classList.toggle("flipped");
+    }
+
+    function speakCurrentWord(event) {
+      if (event) event.stopPropagation();
+      const currentWord = vocabularyDB[currentIndex].word;
+      const accent = document.getElementById("accent-select").value;
+      const utterance = new SpeechSynthesisUtterance(currentWord);
+      utterance.lang = accent;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function nextCard() {
+      if (currentIndex < vocabularyDB.length - 1) {
+        currentIndex++;
+        updateCardUI();
+      }
+    }
+
+    function prevCard() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        updateCardUI();
+      }
+    }
+
+    function randomCard() {
+      currentIndex = Math.floor(Math.random() * vocabularyDB.length);
+      updateCardUI();
+    }
+
+    function markMemory(isKnown) {
+      if (isKnown) {
+        learnedCount++;
+        document.getElementById("stat-learned").innerText = "จำได้แล้ว: " + learnedCount;
+      } else {
+        reviewCount++;
+        document.getElementById("stat-review").innerText = "ต้องทบทวน: " + reviewCount;
+      }
+      nextCard();
+    }
+
+    function updateCardUI() {
+      const data = vocabularyDB[currentIndex];
+      document.getElementById("card-word").innerText = data.word;
+      document.getElementById("card-pos").innerText = data.pos;
+      document.getElementById("card-meaning").innerText = data.meaning;
+      document.getElementById("card-synonyms").innerText = "Synonyms: " + data.synonyms;
+      document.getElementById("card-example").innerText = '"' + data.example + '"';
+      document.getElementById("progress").innerText = (currentIndex + 1) + " / " + vocabularyDB.length;
+      
+      const card = document.getElementById("card");
+      if (card && card.classList.contains("flipped")) {
+        card.classList.remove("flipped");
+      }
+    }
+
+    updateCardUI();
+  </script>
+</body>
+</html>
