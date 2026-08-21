@@ -1413,154 +1413,79 @@
       { word: "Factitious", pos: "Adjective", meaning: "ที่เสแสร้งสร้างขึ้นมาไม่แท้จริง", synonyms: "artificial, fake", example: "He showed a factitious excitement.", level: "C2" },
       { word: "Juice", pos: "Noun", meaning: "น้ำผลไม้", synonyms: "nectar, beverage", example: "Fresh apple juice is very refreshing.", level: "A2" }
     ];
-
+// ตัวแปรควบคุมระบบ
     let currentIndex = 0;
-    let memoryStatus = {}; // { wordIndex: true/false }
-    let quizScore = 0;
-    let quizTotal = 0;
-    let currentQuizCorrectMeaning = "";
+    let learnedCount = 0;
+    let reviewCount = 0;
 
-    // DOM Elements
-    const card = document.getElementById("card");
-    const accentSelect = document.getElementById("accent-select");
-
-    // 2. Mode Switcher
-    function switchMode(mode) {
-      document.getElementById("flashcard-mode").style.display = mode === 'flashcard' ? 'block' : 'none';
-      document.getElementById("game-mode").style.display = mode === 'quiz' ? 'block' : 'none';
-      document.getElementById("tab-flashcard").classList.toggle("active", mode === 'flashcard');
-      document.getElementById("tab-quiz").classList.toggle("active", mode === 'quiz');
-
-      if (mode === 'quiz') {
-        loadNextQuiz();
+    // 1. ฟังก์ชันพลิกการ์ด
+    function flipCard() {
+      const card = document.getElementById("card");
+      if (card) {
+        card.classList.toggle("flipped");
       }
     }
 
-    // 3. Audio Text-to-Speech
-    function playAudio(text, event) {
+    // 2. ฟังก์ชันออกเสียงคำศัพท์
+    function speakCurrentWord(event) {
       if (event) event.stopPropagation();
-      if (!('speechSynthesis' in window)) return;
-
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = accentSelect.value;
-      utterance.rate = 0.85;
-
-      const voices = window.speechSynthesis.getVoices();
-      const matchingVoice = voices.find(v => v.lang === accentSelect.value || v.lang.replace('_', '-') === accentSelect.value);
-      if (matchingVoice) utterance.voice = matchingVoice;
-
+      const currentWord = vocabularyDB[currentIndex].word;
+      const accent = document.getElementById("accent-select").value;
+      const utterance = new SpeechSynthesisUtterance(currentWord);
+      utterance.lang = accent;
       window.speechSynthesis.speak(utterance);
     }
 
-    function speakCurrentWord(e) { playAudio(vocabularyDB[currentIndex].word, e); }
-    function speakQuizWord() { playAudio(document.getElementById("quiz-word").textContent); }
-
-    // 4. Flashcard Functions
-    function renderCard() {
-      window.speechSynthesis.cancel();
-      card.classList.remove("flipped");
-
-      setTimeout(() => {
-        const item = vocabularyDB[currentIndex];
-        document.getElementById("card-word").textContent = item.word;
-        document.getElementById("card-pos").textContent = item.pos;
-        document.getElementById("card-level").textContent = item.level;
-        document.getElementById("card-meaning").textContent = item.meaning;
-        document.getElementById("card-synonyms").textContent = item.synonyms ? `Synonyms: ${item.synonyms}` : '';
-        document.getElementById("card-example").textContent = item.example ? `"${item.example}"` : '';
-        document.getElementById("progress").textContent = `${currentIndex + 1} / ${vocabularyDB.length}`;
-        updateStats();
-      }, 150);
+    // 3. ฟังก์ชันเปลี่ยนคำศัพท์ถัดไป
+    function nextCard() {
+      if (currentIndex < vocabularyDB.length - 1) {
+        currentIndex++;
+        updateCardUI();
+      }
     }
 
-    function flipCard() { card.classList.toggle("flipped"); }
-    function nextCard() { currentIndex = (currentIndex + 1) % vocabularyDB.length; renderCard(); }
-    function prevCard() { currentIndex = (currentIndex - 1 + vocabularyDB.length) % vocabularyDB.length; renderCard(); }
-    function randomCard() { currentIndex = Math.floor(Math.random() * vocabularyDB.length); renderCard(); }
+    // 4. ฟังก์ชันย้อนกลับคำศัพท์
+    function prevCard() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        updateCardUI();
+      }
+    }
 
+    // 5. ฟังก์ชันสุ่มคำศัพท์
+    function randomCard() {
+      currentIndex = Math.floor(Math.random() * vocabularyDB.length);
+      updateCardUI();
+    }
+
+    // 6. ฟังก์ชันบันทึกสถานะจำได้/ต้องทบทวน
     function markMemory(isKnown) {
-      memoryStatus[currentIndex] = isKnown;
-      updateStats();
+      if (isKnown) {
+        learnedCount++;
+        document.getElementById("stat-learned").innerText = "จำได้แล้ว: " + learnedCount;
+      } else {
+        reviewCount++;
+        document.getElementById("stat-review").innerText = "ต้องทบทวน: " + reviewCount;
+      }
       nextCard();
     }
 
-    function updateStats() {
-      const learnedCount = Object.values(memoryStatus).filter(v => v === true).length;
-      const reviewCount = Object.values(memoryStatus).filter(v => v === false).length;
-      document.getElementById("stat-learned").textContent = `จำได้แล้ว: ${learnedCount}`;
-      document.getElementById("stat-review").textContent = `ต้องทบทวน: ${reviewCount}`;
-    }
-
-    // 5. Quiz Game Functions
-    function loadNextQuiz() {
-      document.getElementById("next-quiz-btn").style.display = "none";
-      const targetItem = vocabularyDB[Math.floor(Math.random() * vocabularyDB.length)];
-      currentQuizCorrectMeaning = targetItem.meaning;
-
-      document.getElementById("quiz-word").textContent = targetItem.word;
-
-      // Generate 4 Options (1 correct, 3 wrong distractors)
-      let options = [targetItem.meaning];
-      while (options.length < Math.min(4, vocabularyDB.length)) {
-        const randomMeaning = vocabularyDB[Math.floor(Math.random() * vocabularyDB.length)].meaning;
-        if (!options.includes(randomMeaning)) {
-          options.push(randomMeaning);
-        }
+    // 7. ฟังก์ชันอัปเดตข้อมูลบนหน้าการ์ด
+    function updateCardUI() {
+      const data = vocabularyDB[currentIndex];
+      document.getElementById("card-word").innerText = data.word;
+      document.getElementById("card-pos").innerText = data.pos;
+      document.getElementById("card-meaning").innerText = data.meaning;
+      document.getElementById("card-synonyms").innerText = "Synonyms: " + data.synonyms;
+      document.getElementById("card-example").innerText = '"' + data.example + '"';
+      document.getElementById("card-level").innerText = data.level;
+      document.getElementById("progress").innerText = (currentIndex + 1) + " / " + vocabularyDB.length;
+      
+      const card = document.getElementById("card");
+      if (card && card.classList.contains("flipped")) {
+        card.classList.remove("flipped");
       }
-
-      // Shuffle options array
-      options.sort(() => Math.random() - 0.5);
-
-      const optionsContainer = document.getElementById("options-container");
-      optionsContainer.innerHTML = "";
-
-      options.forEach(optionText => {
-        const btn = document.createElement("button");
-        btn.className = "option-btn";
-        btn.textContent = optionText;
-        btn.onclick = () => checkQuizAnswer(btn, optionText);
-        optionsContainer.appendChild(btn);
-      });
     }
 
-    function checkQuizAnswer(selectedBtn, selectedText) {
-      const allBtns = document.querySelectorAll(".option-btn");
-      allBtns.forEach(btn => btn.disabled = true); // Disable all buttons after pick
-
-      quizTotal++;
-      if (selectedText === currentQuizCorrectMeaning) {
-        selectedBtn.classList.add("correct");
-        quizScore++;
-      } else {
-        selectedBtn.classList.add("wrong");
-        // Highlight the correct answer
-        allBtns.forEach(btn => {
-          if (btn.textContent === currentQuizCorrectMeaning) btn.classList.add("correct");
-        });
-      }
-
-      document.getElementById("quiz-score").textContent = `คะแนน: ${quizScore} / ${quizTotal}`;
-      document.getElementById("next-quiz-btn").style.display = "block";
-    }
-
-    // Keyboard Shortcuts Navigation
-    document.addEventListener("keydown", (e) => {
-      if (document.getElementById("flashcard-mode").style.display !== "none") {
-        if (e.code === "Space") { e.preventDefault(); flipCard(); }
-        else if (e.code === "ArrowRight") nextCard();
-        else if (e.code === "ArrowLeft") prevCard();
-        else if (e.key === "s" || e.key === "S") speakCurrentWord();
-      }
-    });
-
-    // Voice Preload setup
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
-    }
-
-    // Init First Load
-    renderCard();
-  </script>
-</body>
-</html>
+    // โหลดข้อมูลคำศัพท์แรกเมื่อเริ่มเปิดหน้าเว็บ
+    updateCardUI();
